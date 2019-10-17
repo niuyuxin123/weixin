@@ -55,7 +55,42 @@ function userMsg(wxmsg,retmsg){
 exports.help=help;
 exports.userMsg=userMsg;
 
-//后续还会加入事件消息指出
-exports.msgDispatch = function msgDispatch(wxmsg, retmsg) {
-    return userMsg(wxmsg, retmsg);
+// //后续还会加入事件消息指出
+// exports.msgDispatch = function msgDispatch(wxmsg, retmsg) {
+//     return userMsg(wxmsg, retmsg);
+// };
+function eventMsg(wxmsg,retmsg){
+    retmsg.msgtype = 'text';
+    switch (wxmsg.Event){
+        case 'subscribe':
+            retmsg.msg = '你好,这是一个测试号，尽管没什么用，但还是谢谢关注'
+            return formatMsg(retmsg);
+        case 'unsubscribe':
+            console.log(wxmsg.FromUserName,"取消关注");
+            break;
+        case 'CLICK':
+            retmsg.msg = wxmsg.EventKey;
+            return formatMsg(retmsg);
+        case 'VIEW':
+            console.log('用户浏览',wxmsg.EventKey);
+            break;
+        case 'pic_sysphoto':
+        case 'pic_weixin':
+        case 'pic_photo_or_album':
+            console.log('选择图片',wxmsg.EventKey);
+            retmsg.msgtype=wxmsg.MsgType;
+            retmsg.msg=wxmsg.MediaId;
+            return formatMsg(retmsg);
+        
+        default:
+            return '';
+    }
+    return '';
+}
+
+exports.msgDispatch = function(wxmsg,retmsg){
+    if(wxmsg.MsgType == 'event'){
+        return eventMsg(wxmsg,retmsg);
+    }
+    return userMsg(wxmsg,retmsg);
 };
